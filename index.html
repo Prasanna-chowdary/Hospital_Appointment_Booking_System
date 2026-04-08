@@ -1,0 +1,1684 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Prescripto – Book Appointment With Trusted Doctors</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+/* ============================================================
+   CSS VARIABLES & RESET
+============================================================ */
+:root{
+  --blue:#4361ee; --blue-d:#3451d1; --blue-l:#eef1ff;
+  --green:#22c55e; --orange:#f97316; --red:#ef4444; --purple:#8b5cf6; --teal:#0e7490;
+  --text:#1e1e2e; --muted:#6b7280; --border:#e5e7eb; --bg:#f8faff;
+  --shadow:0 4px 24px rgba(67,97,238,.08); --shadow-lg:0 8px 40px rgba(67,97,238,.15);
+  --r:14px; --r-sm:8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-thumb{background:var(--blue);border-radius:3px}
+a{text-decoration:none;color:inherit}
+input,select,textarea,button{font-family:inherit}
+
+/* ============================================================
+   PAGE SYSTEM
+============================================================ */
+.page{display:none}.page.active{display:block}
+.dash-page{display:none}.dash-page.active{display:flex;min-height:calc(100vh - 68px)}
+
+/* ============================================================
+   TOAST
+============================================================ */
+#toast{position:fixed;bottom:28px;right:28px;padding:14px 22px;border-radius:12px;font-size:.9rem;font-weight:600;
+  transform:translateY(80px);opacity:0;transition:all .35s ease;z-index:9999;max-width:320px;pointer-events:none}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.s{background:#16a34a;color:#fff;box-shadow:0 6px 20px rgba(22,163,74,.3)}
+#toast.e{background:var(--red);color:#fff;box-shadow:0 6px 20px rgba(239,68,68,.3)}
+#toast.i{background:var(--blue);color:#fff;box-shadow:0 6px 20px rgba(67,97,238,.3)}
+
+/* ============================================================
+   MODAL
+============================================================ */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center}
+.ov.on{display:flex}
+.mbox{background:#fff;border-radius:var(--r);padding:32px 36px;width:500px;max-width:95vw;position:relative;
+  box-shadow:var(--shadow-lg);animation:mIn .25s ease;max-height:90vh;overflow-y:auto}
+.mbox.wide{width:580px}
+@keyframes mIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.mclose{position:absolute;top:14px;right:18px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#aaa}
+.mclose:hover{color:var(--text)}
+.mtitle{font-size:1.3rem;font-weight:800;margin-bottom:6px}
+.msub{font-size:.85rem;color:var(--muted);margin-bottom:22px}
+
+/* ============================================================
+   NAVBAR
+============================================================ */
+.navbar{display:flex;align-items:center;justify-content:space-between;padding:14px 52px;
+  background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.04)}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo-icon{width:38px;height:38px;background:var(--blue);border-radius:10px;
+  display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:22px;height:22px;fill:#fff}
+.logo-text{font-size:1.4rem;font-weight:800;color:var(--text)}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{color:var(--muted);font-size:.88rem;font-weight:500;transition:color .2s;cursor:pointer}
+.nav-links a:hover,.nav-links li.act a{color:var(--blue)}
+.nav-links li.act a{font-weight:700;border-bottom:2px solid var(--blue);padding-bottom:2px}
+.nav-right{display:flex;gap:10px;align-items:center}
+
+/* ============================================================
+   BUTTONS
+============================================================ */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:50px;
+  font-size:.88rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-p{background:var(--blue);color:#fff}.btn-p:hover{background:var(--blue-d);transform:translateY(-1px);box-shadow:0 4px 16px rgba(67,97,238,.3)}
+.btn-o{background:#fff;color:var(--blue);border:2px solid var(--blue)}.btn-o:hover{background:var(--blue-l)}
+.btn-w{background:#fff;color:var(--text)}.btn-w:hover{box-shadow:0 4px 16px rgba(0,0,0,.12);transform:translateY(-1px)}
+.btn-s{background:#dcfce7;color:#16a34a}.btn-s:hover{background:#bbf7d0}
+.btn-d{background:#fee2e2;color:var(--red)}.btn-d:hover{background:#fecaca}
+.btn-sm{padding:5px 12px;font-size:.75rem;border-radius:6px}
+.btn-full{width:100%;justify-content:center;border-radius:var(--r-sm);padding:13px;font-size:.95rem}
+
+/* ============================================================
+   FORMS
+============================================================ */
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:.75rem;font-weight:700;color:var(--muted);margin-bottom:6px;
+  text-transform:uppercase;letter-spacing:.04em}
+.fc{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:var(--r-sm);
+  font-size:.9rem;outline:none;transition:border-color .2s,box-shadow .2s;background:#fff;color:var(--text)}
+.fc:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(67,97,238,.1)}
+.fc:disabled{background:#f5f5f5;color:#aaa;cursor:not-allowed}
+.frow{display:flex;gap:14px}.frow .fg{flex:1}
+textarea.fc{height:90px;resize:vertical}
+
+/* ============================================================
+   CARD
+============================================================ */
+.card{background:#fff;border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow)}
+.card-h{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-h h3{font-size:1rem;font-weight:700}
+.card-b{padding:22px}
+
+/* ============================================================
+   BADGES
+============================================================ */
+.bdg{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:700}
+.bdg-pending{background:#fff7ed;color:#c2410c}
+.bdg-confirmed{background:#dcfce7;color:#16a34a}
+.bdg-completed{background:var(--blue-l);color:var(--blue)}
+.bdg-cancelled{background:#fee2e2;color:var(--red)}
+.bdg-blue{background:var(--blue-l);color:var(--blue)}
+.bdg-green{background:#dcfce7;color:#16a34a}
+.bdg-orange{background:#fff7ed;color:#c2410c}
+
+/* ============================================================
+   TABLE
+============================================================ */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:12px 20px;font-size:.72rem;font-weight:700;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.05em;background:#fafafa;border-bottom:1px solid var(--border)}
+td{padding:13px 20px;font-size:.875rem;border-bottom:1px solid #f5f5f5;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafe}
+
+/* ============================================================
+   AVATAR
+============================================================ */
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;flex-shrink:0}
+.av-sm{width:34px;height:34px;font-size:.78rem}
+.av-md{width:44px;height:44px;font-size:.9rem}
+.av-lg{width:64px;height:64px;font-size:1.4rem}
+.av-xl{width:88px;height:88px;font-size:1.9rem}
+
+/* ============================================================
+   STAT CARDS
+============================================================ */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.sc{background:#fff;border-radius:var(--r);padding:20px;border:1px solid var(--border);position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.sc.bl::before{background:var(--blue)}.sc.gn::before{background:var(--green)}
+.sc.or::before{background:var(--orange)}.sc.pu::before{background:var(--purple)}
+.sc-ico{font-size:1.8rem;margin-bottom:10px}
+.sc-lbl{font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.sc-val{font-size:2.2rem;font-weight:800;margin-top:4px}
+.sc-sub{font-size:.72rem;margin-top:2px}
+
+/* ============================================================
+   ANIMATIONS
+============================================================ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fu1{animation:fadeUp .4s .05s ease both}.fu2{animation:fadeUp .4s .1s ease both}
+.fu3{animation:fadeUp .4s .15s ease both}.fu4{animation:fadeUp .4s .2s ease both}
+
+/* ============================================================
+   HERO / CAROUSEL
+============================================================ */
+.hero-wrap{padding:0 52px;margin:20px 0;position:relative}
+.hero{border-radius:18px;padding:60px 60px 0;display:flex;align-items:flex-end;
+  justify-content:space-between;overflow:hidden;min-height:340px;position:relative;transition:background .8s}
+.hero-content{max-width:440px;padding-bottom:60px;z-index:2}
+.hero-content h1{font-size:2.6rem;font-weight:800;color:#fff;line-height:1.2;margin-bottom:18px}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.hero-avs{display:flex}
+.hero-avs img{width:32px;height:32px;border-radius:50%;border:2px solid #fff;margin-left:-8px;object-fit:cover}
+.hero-avs img:first-child{margin-left:0}
+.hero-meta p{font-size:.8rem;color:rgba(255,255,255,.88);max-width:240px;line-height:1.5}
+.hero-docs{display:flex;align-items:flex-end;z-index:2}
+.carr-btn{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;
+  background:#fff;border:none;border-radius:50%;box-shadow:0 2px 12px rgba(0,0,0,.15);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#555;z-index:10;transition:all .2s}
+.carr-btn:hover{box-shadow:0 4px 20px rgba(0,0,0,.2);transform:translateY(-50%) scale(1.08)}
+.carr-btn.L{left:10px}.carr-btn.R{right:10px}
+.cdots{display:flex;justify-content:center;gap:8px;margin-top:12px}
+.cdot{width:8px;height:8px;border-radius:50%;background:#d1d5db;cursor:pointer;transition:background .2s}
+.cdot.on{background:var(--blue)}
+
+/* ============================================================
+   SECTION COMMON
+============================================================ */
+.sec{padding:52px}
+.sec-t{text-align:center;font-size:1.8rem;font-weight:800;margin-bottom:8px}
+.sec-s{text-align:center;color:var(--muted);font-size:.9rem;margin-bottom:36px}
+
+/* ============================================================
+   SPECIALITY
+============================================================ */
+.spec-grid{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}
+.spec-card{display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 14px;
+  border:1.5px solid var(--border);border-radius:14px;width:112px;cursor:pointer;transition:all .2s}
+.spec-card:hover{transform:translateY(-5px);border-color:var(--blue);box-shadow:0 6px 20px rgba(67,97,238,.12)}
+.spec-card.on{border-color:var(--blue);background:var(--blue-l)}
+.spec-ico{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem}
+.spec-card span{font-size:.73rem;font-weight:600;color:var(--text);text-align:center;line-height:1.3}
+
+/* ============================================================
+   DOCTOR CARD
+============================================================ */
+.dgrid{display:flex;gap:20px;flex-wrap:wrap;justify-content:center}
+.dcard{border:1.5px solid var(--border);border-radius:16px;width:188px;overflow:hidden;
+  cursor:pointer;transition:all .2s;background:#fff}
+.dcard:hover{transform:translateY(-5px);box-shadow:0 10px 28px rgba(67,97,238,.14);border-color:var(--blue)}
+.dcard-img{width:100%;height:162px;display:flex;align-items:flex-end;justify-content:center;overflow:hidden}
+.dcard-body{padding:12px 14px}
+.avail{display:flex;align-items:center;gap:5px;font-size:.7rem;color:var(--green);font-weight:700;margin-bottom:4px}
+.avail-dot{width:7px;height:7px;background:var(--green);border-radius:50%}
+.dcard-name{font-size:.88rem;font-weight:700;margin-bottom:2px}
+.dcard-spec{font-size:.74rem;color:var(--muted)}
+
+/* ============================================================
+   SLOT GRID
+============================================================ */
+.slot-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.slot-btn{padding:8px 16px;border-radius:8px;border:1.5px solid var(--border);background:#fff;
+  font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s}
+.slot-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.slot-btn.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.slot-btn:disabled,.slot-btn.taken{background:#fee2e2;color:#fca5a5;cursor:not-allowed;border-color:#fecaca;text-decoration:line-through}
+.slot-legend{display:flex;gap:16px;font-size:.72rem;color:var(--muted);margin-bottom:8px}
+.ldot{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:4px;vertical-align:middle}
+
+/* ============================================================
+   AUTH TABS
+============================================================ */
+.atabs{display:flex;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:24px}
+.atab{flex:1;padding:11px;text-align:center;cursor:pointer;font-weight:600;font-size:.88rem;
+  color:var(--muted);border:none;background:#fff;transition:all .2s}
+.atab.on{background:var(--blue);color:#fff}
+
+/* ============================================================
+   LOGIN CARD (patient & doctor)
+============================================================ */
+.login-page{min-height:100vh;display:flex;flex-direction:column}
+.login-center{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 20px}
+.lcard{background:#fff;border-radius:20px;box-shadow:var(--shadow-lg);width:480px;max-width:100%;overflow:hidden}
+.lbanner{padding:36px;color:#fff;text-align:center}
+.lbanner h2{font-size:1.6rem;font-weight:800;margin-bottom:6px}
+.lbanner p{font-size:.88rem;opacity:.88}
+.lbody{padding:36px}
+.demo-note{background:var(--blue-l);border-radius:8px;padding:11px 14px;font-size:.78rem;color:var(--blue);margin-bottom:18px;line-height:1.6}
+
+/* ============================================================
+   PATIENT DASHBOARD
+============================================================ */
+.appt-card{background:#fff;border-radius:var(--r);border:1.5px solid var(--border);
+  padding:20px 24px;display:flex;align-items:center;gap:20px;transition:all .2s;margin-bottom:14px}
+.appt-card:hover{box-shadow:var(--shadow);border-color:var(--blue)}
+.appt-info{flex:1}
+.appt-dname{font-weight:700;font-size:1rem}
+.appt-dspec{font-size:.8rem;color:var(--muted);margin-top:2px}
+.appt-meta{display:flex;flex-direction:column;gap:4px;min-width:165px}
+.ameta-row{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--muted)}
+.ameta-row strong{color:var(--text)}
+.appt-actions{display:flex;gap:8px;flex-direction:column}
+.ftabs{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.ftab{padding:7px 18px;border-radius:50px;border:1.5px solid var(--border);background:#fff;
+  font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s}
+.ftab.on,.ftab:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* ============================================================
+   PATIENT PROFILE
+============================================================ */
+.prof-hero{background:linear-gradient(135deg,var(--blue),#7c3aed);border-radius:var(--r);
+  padding:32px 36px;display:flex;align-items:center;gap:24px;margin-bottom:28px;color:#fff}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+
+/* ============================================================
+   DOCTOR DASHBOARD – SIDEBAR
+============================================================ */
+.dash-sidebar{width:255px;background:#fff;border-right:1px solid var(--border);
+  display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:68px;height:calc(100vh - 68px);overflow-y:auto}
+.ds-top{padding:24px 20px;border-bottom:1px solid var(--border);text-align:center}
+.ds-name{font-weight:800;font-size:.95rem;margin-top:10px}
+.ds-spec{font-size:.75rem;color:var(--muted)}
+.online-pill{display:inline-flex;align-items:center;gap:5px;background:#dcfce7;color:#16a34a;
+  border-radius:20px;padding:3px 10px;font-size:.7rem;font-weight:600;margin-top:6px}
+.online-dot{width:6px;height:6px;background:var(--green);border-radius:50%}
+.dash-nav{list-style:none;padding:12px 0;flex:1}
+.dash-nav li a{display:flex;align-items:center;gap:12px;padding:12px 20px;font-size:.875rem;
+  font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s}
+.dash-nav li a:hover{background:var(--blue-l);color:var(--blue)}
+.dash-nav li.on a{background:var(--blue-l);color:var(--blue);font-weight:700;border-right:3px solid var(--blue)}
+.ds-foot{padding:16px 20px;border-top:1px solid var(--border)}
+
+/* ============================================================
+   DOCTOR DASHBOARD – MAIN
+============================================================ */
+.dash-main{flex:1;padding:28px 36px;overflow-y:auto}
+.dash-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
+.dash-top h1{font-size:1.55rem;font-weight:800}
+.dash-top p{font-size:.85rem;color:var(--muted);margin-top:3px}
+.date-chip{background:#fff;border:1px solid var(--border);padding:8px 16px;border-radius:8px;font-size:.82rem;font-weight:600;color:var(--muted)}
+.dtab{display:none}.dtab.on{display:block}
+
+/* ============================================================
+   TIMELINE
+============================================================ */
+.tl-item{display:flex;gap:14px;padding:14px 22px;border-bottom:1px solid #f5f5f5;align-items:center}
+.tl-item:last-child{border-bottom:none}
+.tl-time{font-size:.8rem;color:var(--muted);font-weight:600;width:72px;flex-shrink:0}
+.tl-bar{width:4px;border-radius:4px;min-height:44px;flex-shrink:0}
+.tl-name{font-weight:700;font-size:.88rem}
+.tl-detail{font-size:.75rem;color:var(--muted);margin-top:2px}
+
+/* ============================================================
+   PATIENT CELL IN TABLE
+============================================================ */
+.pt-cell{display:flex;align-items:center;gap:10px}
+.pt-name{font-weight:700;font-size:.875rem}
+.pt-sub{font-size:.72rem;color:var(--muted)}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+footer{background:#1a1a2e;color:#9ca3af;padding:48px 52px}
+.foot-g{display:grid;grid-template-columns:2fr 1fr 1fr;gap:48px;margin-bottom:32px}
+.foot-brand p{font-size:.82rem;line-height:1.7;margin-top:14px}
+.foot-col h4{color:#fff;font-size:.85rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px}
+.foot-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.foot-col ul li a{color:#9ca3af;font-size:.82rem;transition:color .2s;cursor:pointer}
+.foot-col ul li a:hover{color:#fff}
+.foot-bottom{border-top:1px solid #374151;padding-top:22px;text-align:center;font-size:.78rem}
+
+/* ============================================================
+   EMPTY STATE
+============================================================ */
+.empty{text-align:center;padding:48px;color:var(--muted)}
+.empty-ico{font-size:3rem;margin-bottom:12px}
+
+/* ============================================================
+   ABOUT STATS
+============================================================ */
+.astats{display:flex;justify-content:center;gap:48px;flex-wrap:wrap;margin:36px 0}
+.anum{font-size:2.4rem;font-weight:800;text-align:center}
+.albl{font-size:.85rem;color:var(--muted);text-align:center;margin-top:4px}
+
+/* ============================================================
+   RESPONSIVE
+============================================================ */
+@media(max-width:768px){
+  .navbar{padding:14px 20px}
+  .nav-links{display:none}
+  .sgrid{grid-template-columns:repeat(2,1fr)}
+  .dash-sidebar{display:none}
+  .dash-main{padding:20px}
+  .hero{padding:30px 24px 0}
+  .hero-content h1{font-size:1.8rem}
+  .hero-docs{display:none}
+  .sec{padding:32px 20px}
+  .pgrid{grid-template-columns:1fr}
+  footer{padding:32px 20px}
+  .foot-g{grid-template-columns:1fr;gap:24px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== TOAST ===================== -->
+<div id="toast"></div>
+
+<!-- ===================== MODALS ===================== -->
+
+<!-- BOOK APPOINTMENT -->
+<div class="ov" id="M_book">
+  <div class="mbox">
+    <button class="mclose" onclick="CM('M_book')">&times;</button>
+    <div class="mtitle">Book Appointment</div>
+    <div class="msub">Schedule your visit with a trusted doctor</div>
+    <div id="bookBanner" style="display:flex;align-items:center;gap:12px;background:var(--blue-l);border-radius:10px;padding:12px 14px;margin-bottom:18px"></div>
+    <div class="frow">
+      <div class="fg"><label>Your Name</label><input class="fc" id="bName" placeholder="Full name"/></div>
+      <div class="fg"><label>Phone</label><input class="fc" id="bPhone" placeholder="+1 000 000 0000"/></div>
+    </div>
+    <div class="frow">
+      <div class="fg"><label>Email</label><input class="fc" id="bEmail" placeholder="you@email.com"/></div>
+      <div class="fg">
+        <label>Reason</label>
+        <select class="fc" id="bReason">
+          <option value="">Select reason</option>
+          <option>General Checkup</option><option>Follow-up Visit</option>
+          <option>New Symptom</option><option>Lab Results Review</option>
+          <option>Prescription Refill</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label>Date</label><input class="fc" type="date" id="bDate" onchange="loadSlots()"/></div>
+    <div style="font-size:.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px">Select Time Slot</div>
+    <div class="slot-legend">
+      <span><span class="ldot" style="background:#e5e7eb;border:1px solid #d1d5db"></span>Available</span>
+      <span><span class="ldot" style="background:#fee2e2;border:1px solid #fecaca"></span>Booked</span>
+      <span><span class="ldot" style="background:var(--blue)"></span>Selected</span>
+    </div>
+    <div class="slot-grid" id="slotGrid"><p style="font-size:.8rem;color:var(--muted)">Select a date to see available slots.</p></div>
+    <p id="slotMsg" style="font-size:.78rem;color:var(--muted);margin-top:6px"></p>
+    <button class="btn btn-p btn-full" style="margin-top:16px" onclick="confirmBooking()">Confirm Appointment ✓</button>
+  </div>
+</div>
+
+<!-- PATIENT AUTH -->
+<div class="ov" id="M_auth">
+  <div class="mbox">
+    <button class="mclose" onclick="CM('M_auth')">&times;</button>
+    <div class="atabs">
+      <button class="atab on" id="atLogin" onclick="switchAuth('login')">Login</button>
+      <button class="atab" id="atSignup" onclick="switchAuth('signup')">Create Account</button>
+    </div>
+    <div id="authLogin">
+      <div class="mtitle">Welcome Back</div>
+      <div class="msub">Login to your patient account</div>
+      <div class="fg"><label>Email</label><input class="fc" id="lEmail" type="email" placeholder="you@email.com"/></div>
+      <div class="fg"><label>Password</label><input class="fc" id="lPass" type="password" placeholder="Your password"/></div>
+      <button class="btn btn-p btn-full" onclick="handleLogin()">Login</button>
+      <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-top:12px">Don't have an account? <a style="color:var(--blue);cursor:pointer;font-weight:700" onclick="switchAuth('signup')">Sign up</a></p>
+    </div>
+    <div id="authSignup" style="display:none">
+      <div class="mtitle">Create Account</div>
+      <div class="msub">Sign up as a patient to book appointments</div>
+      <div class="frow">
+        <div class="fg"><label>First Name</label><input class="fc" id="sFirst" placeholder="John"/></div>
+        <div class="fg"><label>Last Name</label><input class="fc" id="sLast" placeholder="Doe"/></div>
+      </div>
+      <div class="fg"><label>Email</label><input class="fc" id="sEmail" type="email" placeholder="you@email.com"/></div>
+      <div class="fg"><label>Phone</label><input class="fc" id="sPhone" placeholder="+1 000 000 0000"/></div>
+      <div class="fg"><label>Password</label><input class="fc" id="sPass" type="password" placeholder="Min 6 characters"/></div>
+      <button class="btn btn-p btn-full" onclick="handleSignup()">Create Account</button>
+      <p style="font-size:.75rem;color:var(--muted);text-align:center;margin-top:12px">Already have an account? <a style="color:var(--blue);cursor:pointer;font-weight:700" onclick="switchAuth('login')">Login</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- DOCTOR AUTH -->
+<div class="ov" id="M_docAuth">
+  <div class="mbox">
+    <button class="mclose" onclick="CM('M_docAuth')">&times;</button>
+    <div style="text-align:center;font-size:2.5rem;margin-bottom:12px">🩺</div>
+    <div class="mtitle" style="text-align:center">Doctor Login</div>
+    <div class="msub" style="text-align:center">Access your dashboard & manage appointments</div>
+    <div class="demo-note"><strong>Demo:</strong> Select your profile → enter any email & password → Login</div>
+    <div class="fg"><label>Select Your Profile</label><select class="fc" id="docSel"><option value="">-- Choose your name --</option></select></div>
+    <div class="fg"><label>Email</label><input class="fc" id="dEmail" type="email" placeholder="doctor@prescripto.com"/></div>
+    <div class="fg"><label>Password</label><input class="fc" id="dPass" type="password" placeholder="Enter password"/></div>
+    <button class="btn btn-p btn-full" onclick="handleDocLogin()">Login to Dashboard</button>
+  </div>
+</div>
+
+<!-- CANCEL CONFIRM -->
+<div class="ov" id="M_cancel">
+  <div class="mbox" style="width:400px">
+    <button class="mclose" onclick="CM('M_cancel')">&times;</button>
+    <div class="mtitle">Cancel Appointment?</div>
+    <div id="cancelInfo" style="background:var(--blue-l);padding:14px;border-radius:10px;margin:14px 0;font-size:.88rem;line-height:1.6"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-o" style="flex:1" onclick="CM('M_cancel')">Keep It</button>
+      <button class="btn btn-d" style="flex:1;border-radius:50px" onclick="doCancel()">Yes, Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- APPOINTMENT DETAIL (patient) -->
+<div class="ov" id="M_detail">
+  <div class="mbox"><button class="mclose" onclick="CM('M_detail')">&times;</button><div id="detailContent"></div></div>
+</div>
+
+<!-- NOTES / RX (doctor) -->
+<div class="ov" id="M_notes">
+  <div class="mbox wide">
+    <button class="mclose" onclick="CM('M_notes')">&times;</button>
+    <div class="mtitle" id="notesTitle">Notes & Prescription</div>
+    <div class="msub" id="notesSub"></div>
+    <div id="notesBody"></div>
+  </div>
+</div>
+
+<!-- PATIENT HISTORY (doctor) -->
+<div class="ov" id="M_hist">
+  <div class="mbox wide">
+    <button class="mclose" onclick="CM('M_hist')">&times;</button>
+    <div class="mtitle" id="histTitle">Patient History</div>
+    <div class="msub" id="histSub"></div>
+    <div id="histBody" style="max-height:420px;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- ===================== NAVBAR (main) ===================== -->
+<nav class="navbar" id="navMain">
+  <div class="logo" onclick="SP('home')">
+    <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14H8v-2h4v2zm4-4H8v-2h8v2zm0-4H8V7h8v2z"/></svg></div>
+    <span class="logo-text">Prescripto</span>
+  </div>
+  <ul class="nav-links" id="mainNav">
+    <li class="act"><a onclick="SP('home')">HOME</a></li>
+    <li><a onclick="SP('allDocs')">ALL DOCTORS</a></li>
+    <li><a onclick="SP('about')">ABOUT</a></li>
+    <li><a onclick="SP('contact')">CONTACT</a></li>
+  </ul>
+  <div class="nav-right">
+    <button class="btn btn-o" style="font-size:.82rem;padding:8px 18px" onclick="OM('M_docAuth')">🩺 Doctor Login</button>
+    <button class="btn btn-p" id="patBtn" onclick="patBtnClick()">Create account</button>
+  </div>
+</nav>
+
+<!-- NAVBAR (patient dashboard) -->
+<nav class="navbar" id="navPat" style="display:none">
+  <div class="logo" onclick="showPatPage('appts')">
+    <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14H8v-2h4v2zm4-4H8v-2h8v2zm0-4H8V7h8v2z"/></svg></div>
+    <span class="logo-text">Prescripto</span>
+  </div>
+  <ul class="nav-links" id="patNavLinks">
+    <li class="act"><a onclick="showPatPage('appts')">My Appointments</a></li>
+    <li><a onclick="showPatPage('profile')">My Profile</a></li>
+    <li><a onclick="SP('home')">Book New</a></li>
+  </ul>
+  <div class="nav-right">
+    <span id="patNavName" style="font-size:.85rem;font-weight:600;color:var(--muted)"></span>
+    <button class="btn btn-d btn-sm" onclick="logoutPat()" style="border-radius:50px">Logout</button>
+  </div>
+</nav>
+
+<!-- ===================== HOME ===================== -->
+<div class="page active" id="P_home">
+
+  <!-- HERO -->
+  <div class="hero-wrap fu1">
+    <button class="carr-btn L" onclick="slide(-1)">&#8249;</button>
+    <div class="hero" id="heroEl" style="background:#4361ee">
+      <div class="hero-content">
+        <h1 id="heroTitle">Book Appointment<br>With Trusted Doctors</h1>
+        <div class="hero-meta">
+          <div class="hero-avs">
+            <img src="https://i.pravatar.cc/60?img=1" alt=""/>
+            <img src="https://i.pravatar.cc/60?img=5" alt=""/>
+            <img src="https://i.pravatar.cc/60?img=9" alt=""/>
+          </div>
+          <p id="heroDesc">Simply browse through our extensive list of trusted doctors, schedule your appointment hassle-free.</p>
+        </div>
+        <button class="btn btn-w" onclick="OM('M_book')">Book appointment →</button>
+      </div>
+      <div class="hero-docs">
+        <svg viewBox="0 0 520 300" style="width:480px;height:280px" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="160" cy="295" rx="55" ry="8" fill="rgba(0,0,0,.1)"/>
+          <rect x="130" y="170" width="60" height="130" rx="10" fill="#4fc3f7"/>
+          <circle cx="160" cy="155" r="30" fill="#FDBCB4"/>
+          <ellipse cx="160" cy="130" rx="30" ry="14" fill="#5d4037"/>
+          <rect x="110" y="185" width="25" height="14" rx="7" fill="#4fc3f7" transform="rotate(-10,110,185)"/>
+          <rect x="185" y="185" width="25" height="14" rx="7" fill="#4fc3f7" transform="rotate(10,185,185)"/>
+          <ellipse cx="120" cy="198" rx="10" ry="8" fill="#FDBCB4"/>
+          <ellipse cx="200" cy="198" rx="10" ry="8" fill="#FDBCB4"/>
+          <path d="M150 162 Q160 170 170 162" stroke="#c57a60" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <circle cx="152" cy="152" r="3" fill="#333"/><circle cx="168" cy="152" r="3" fill="#333"/>
+          <ellipse cx="280" cy="295" rx="60" ry="8" fill="rgba(0,0,0,.1)"/>
+          <rect x="248" y="165" width="64" height="135" rx="10" fill="white"/>
+          <rect x="270" y="165" width="20" height="80" fill="#2c3e50"/>
+          <polygon points="278,175 282,175 284,200 276,200" fill="#c0392b"/>
+          <path d="M255 185 Q245 210 255 225 Q265 240 280 230" stroke="#888" stroke-width="3" fill="none"/>
+          <circle cx="280" cy="230" r="8" fill="#aaa" stroke="#888" stroke-width="2"/>
+          <rect x="294" y="185" width="26" height="34" rx="3" fill="#2563eb"/>
+          <rect x="296" y="178" width="22" height="8" rx="2" fill="#1e40af"/>
+          <circle cx="280" cy="148" r="32" fill="#d4a574"/>
+          <ellipse cx="280" cy="120" rx="32" ry="16" fill="#9e9e9e"/>
+          <circle cx="270" cy="145" r="3.5" fill="#333"/><circle cx="290" cy="145" r="3.5" fill="#333"/>
+          <path d="M270 155 Q280 163 290 155" stroke="#b07a50" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <ellipse cx="390" cy="295" rx="52" ry="8" fill="rgba(0,0,0,.1)"/>
+          <rect x="360" y="175" width="60" height="125" rx="10" fill="white"/>
+          <rect x="376" y="175" width="28" height="60" fill="#f8f8f8"/>
+          <rect x="406" y="210" width="18" height="30" rx="3" fill="#222"/>
+          <rect x="408" y="213" width="14" height="24" rx="2" fill="#4fc3f7"/>
+          <circle cx="390" cy="158" r="28" fill="#FDBCB4"/>
+          <ellipse cx="390" cy="133" rx="28" ry="13" fill="#f9d423"/>
+          <rect x="362" y="133" width="8" height="40" rx="4" fill="#f9d423"/>
+          <rect x="420" y="133" width="8" height="40" rx="4" fill="#f9d423"/>
+          <circle cx="382" cy="155" r="3" fill="#333"/><circle cx="398" cy="155" r="3" fill="#333"/>
+          <path d="M382 163 Q390 170 398 163" stroke="#c57a60" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+    <div class="cdots" id="cdots"></div>
+    <button class="carr-btn R" onclick="slide(1)">&#8250;</button>
+  </div>
+
+  <!-- SPECIALITY -->
+  <div class="sec">
+    <h2 class="sec-t">Find by Speciality</h2>
+    <p class="sec-s">Simply browse through our extensive list of trusted doctors,<br>schedule your appointment hassle-free.</p>
+    <div class="spec-grid" id="specGrid"></div>
+  </div>
+
+  <!-- TOP DOCTORS -->
+  <div class="sec" style="background:#fff;padding-top:48px;padding-bottom:60px">
+    <h2 class="sec-t">Top Doctors to Book</h2>
+    <p class="sec-s" id="docSubTxt">Browse our trusted healthcare professionals.</p>
+    <div class="dgrid" id="homeDocs"></div>
+    <div style="text-align:center;margin-top:32px">
+      <button class="btn btn-o" id="moreBtn" onclick="showMore()" style="display:none">Show More</button>
+    </div>
+  </div>
+
+</div><!-- /home -->
+
+<!-- ===================== ALL DOCTORS ===================== -->
+<div class="page" id="P_allDocs">
+  <div class="sec">
+    <h2 class="sec-t">All Doctors</h2>
+    <p class="sec-s">Filter by speciality to find the right doctor for you.</p>
+    <div id="allDocFilters" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:28px"></div>
+    <div class="dgrid" id="allDocGrid"></div>
+  </div>
+</div>
+
+<!-- ===================== ABOUT ===================== -->
+<div class="page" id="P_about">
+  <div class="sec" style="max-width:860px;margin:0 auto;text-align:center">
+    <h2 class="sec-t">About Prescripto</h2>
+    <p class="sec-s">Connecting patients with trusted doctors since 2020</p>
+    <p style="color:var(--muted);line-height:1.8;max-width:680px;margin:0 auto 0">Prescripto is a trusted healthcare appointment platform dedicated to connecting patients with qualified doctors quickly and easily. Our mission is to make quality healthcare accessible to everyone, anywhere.</p>
+    <div class="astats">
+      <div><div class="anum" style="color:var(--blue)">500+</div><div class="albl">Trusted Doctors</div></div>
+      <div><div class="anum" style="color:var(--green)">50K+</div><div class="albl">Appointments</div></div>
+      <div><div class="anum" style="color:var(--orange)">30+</div><div class="albl">Specialities</div></div>
+      <div><div class="anum" style="color:var(--purple)">4.9★</div><div class="albl">Avg Rating</div></div>
+    </div>
+    <button class="btn btn-p" onclick="OM('M_book')">Book an Appointment</button>
+  </div>
+</div>
+
+<!-- ===================== CONTACT ===================== -->
+<div class="page" id="P_contact">
+  <div class="sec" style="max-width:600px;margin:0 auto">
+    <h2 class="sec-t">Contact Us</h2>
+    <p class="sec-s">Have a question? We'd love to hear from you.</p>
+    <div class="frow">
+      <div class="fg"><label>Name</label><input class="fc" id="cName" placeholder="Your name"/></div>
+      <div class="fg"><label>Email</label><input class="fc" id="cEmail" placeholder="you@email.com"/></div>
+    </div>
+    <div class="fg"><label>Subject</label><input class="fc" id="cSubj" placeholder="How can we help?"/></div>
+    <div class="fg"><label>Message</label><textarea class="fc" id="cMsg" placeholder="Your message..."></textarea></div>
+    <button class="btn btn-p btn-full" onclick="sendContact()">Send Message 📨</button>
+  </div>
+</div>
+
+<!-- ===================== PATIENT DASHBOARD ===================== -->
+<div class="page" id="P_patDash">
+  <div style="padding:32px 52px;max-width:1040px;margin:0 auto">
+
+    <!-- MY APPOINTMENTS -->
+    <div id="PP_appts">
+      <div style="margin-bottom:24px">
+        <h1 style="font-size:1.55rem;font-weight:800" id="patWelcome">My Appointments</h1>
+        <p style="color:var(--muted);margin-top:4px">View and manage all your booked appointments</p>
+      </div>
+      <div class="sgrid fu1">
+        <div class="sc bl"><div class="sc-ico">📅</div><div class="sc-lbl">Total</div><div class="sc-val" id="pst1">0</div></div>
+        <div class="sc gn"><div class="sc-ico">✅</div><div class="sc-lbl">Confirmed</div><div class="sc-val" id="pst2">0</div></div>
+        <div class="sc or"><div class="sc-ico">⏳</div><div class="sc-lbl">Pending</div><div class="sc-val" id="pst3">0</div></div>
+        <div class="sc pu"><div class="sc-ico">✔️</div><div class="sc-lbl">Completed</div><div class="sc-val" id="pst4">0</div></div>
+      </div>
+      <div class="ftabs" id="patFtabs">
+        <button class="ftab on" onclick="patFilter('all',this)">All</button>
+        <button class="ftab" onclick="patFilter('pending',this)">Pending</button>
+        <button class="ftab" onclick="patFilter('confirmed',this)">Confirmed</button>
+        <button class="ftab" onclick="patFilter('completed',this)">Completed</button>
+        <button class="ftab" onclick="patFilter('cancelled',this)">Cancelled</button>
+      </div>
+      <div id="patApptList"></div>
+      <button class="btn btn-p" style="margin-top:16px" onclick="SP('home')">+ Book New Appointment</button>
+    </div>
+
+    <!-- MY PROFILE -->
+    <div id="PP_profile" style="display:none">
+      <div class="prof-hero fu1">
+        <div class="av av-xl" id="profAv" style="background:rgba(255,255,255,.2)"></div>
+        <div>
+          <div style="font-size:1.6rem;font-weight:800" id="profHeroName"></div>
+          <div style="font-size:.88rem;opacity:.88;margin-top:4px" id="profHeroEmail"></div>
+          <span style="background:rgba(255,255,255,.2);padding:4px 14px;border-radius:20px;font-size:.78rem;font-weight:600;margin-top:10px;display:inline-block">Patient</span>
+        </div>
+      </div>
+      <div class="pgrid">
+        <div class="card">
+          <div class="card-h"><h3>✏️ Edit Profile</h3></div>
+          <div class="card-b">
+            <div class="frow">
+              <div class="fg"><label>First Name</label><input class="fc" id="pFirst" placeholder="John"/></div>
+              <div class="fg"><label>Last Name</label><input class="fc" id="pLast" placeholder="Doe"/></div>
+            </div>
+            <div class="fg"><label>Email</label><input class="fc" id="pEmail" type="email"/></div>
+            <div class="fg"><label>Phone</label><input class="fc" id="pPhone" placeholder="+1 000 000 0000"/></div>
+            <div class="frow">
+              <div class="fg"><label>Gender</label>
+                <select class="fc" id="pGender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select>
+              </div>
+              <div class="fg"><label>Date of Birth</label><input class="fc" id="pDob" type="date"/></div>
+            </div>
+            <div class="fg"><label>Address</label><input class="fc" id="pAddr" placeholder="Your address"/></div>
+            <button class="btn btn-p btn-full" onclick="savePatProfile()">Save Changes</button>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:20px">
+            <div class="card-h"><h3>🔒 Change Password</h3></div>
+            <div class="card-b">
+              <div class="fg"><label>Current Password</label><input class="fc" id="pwOld" type="password" placeholder="Current password"/></div>
+              <div class="fg"><label>New Password</label><input class="fc" id="pwNew" type="password" placeholder="New password (min 6)"/></div>
+              <div class="fg"><label>Confirm New</label><input class="fc" id="pwCnf" type="password" placeholder="Confirm new password"/></div>
+              <button class="btn btn-p btn-full" onclick="changePwd()">Update Password</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-h"><h3>📊 Account Summary</h3></div>
+            <div class="card-b" id="patSummary"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- /patDash -->
+
+<!-- ===================== DOCTOR DASHBOARD ===================== -->
+<div class="dash-page" id="P_docDash">
+  <!-- SIDEBAR -->
+  <div class="dash-sidebar">
+    <div class="ds-top">
+      <div class="av av-lg" id="dSideAv" style="margin:0 auto;background:var(--blue)">RJ</div>
+      <div class="ds-name" id="dSideName">Dr. Richard James</div>
+      <div class="ds-spec" id="dSideSpec">General physician</div>
+      <div class="online-pill"><div class="online-dot"></div>Online</div>
+    </div>
+    <ul class="dash-nav" id="docNav">
+      <li class="on"><a onclick="docTab('overview')"><span>📊</span> Overview</a></li>
+      <li><a onclick="docTab('appointments')"><span>📅</span> Appointments</a></li>
+      <li><a onclick="docTab('schedule')"><span>🕐</span> Today's Schedule</a></li>
+      <li><a onclick="docTab('patients')"><span>👥</span> Patients</a></li>
+      <li><a onclick="docTab('profile')"><span>👤</span> My Profile</a></li>
+    </ul>
+    <div class="ds-foot">
+      <button class="btn btn-d" style="width:100%;border-radius:8px;justify-content:center" onclick="logoutDoc()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="dash-main">
+    <div class="dash-top">
+      <div><h1 id="docGreet">Good morning, Doctor 👋</h1><p>Here's your appointment overview</p></div>
+      <div class="date-chip" id="docDate"></div>
+    </div>
+
+    <!-- OVERVIEW TAB -->
+    <div class="dtab on" id="DT_overview">
+      <div class="sgrid">
+        <div class="sc bl fu1"><div class="sc-ico">📅</div><div class="sc-lbl">Total Appointments</div><div class="sc-val" id="ov1">0</div><div class="sc-sub" style="color:var(--blue)">All time</div></div>
+        <div class="sc gn fu2"><div class="sc-ico">👥</div><div class="sc-lbl">Today's Patients</div><div class="sc-val" id="ov2">0</div><div class="sc-sub" style="color:var(--green)">Scheduled today</div></div>
+        <div class="sc or fu3"><div class="sc-ico">⏳</div><div class="sc-lbl">Pending</div><div class="sc-val" id="ov3">0</div><div class="sc-sub" style="color:var(--orange)">Need action</div></div>
+        <div class="sc pu fu4"><div class="sc-ico">✔️</div><div class="sc-lbl">Completed</div><div class="sc-val" id="ov4">0</div><div class="sc-sub" style="color:var(--purple)">This month</div></div>
+      </div>
+      <div class="card fu2">
+        <div class="card-h"><h3>Recent Appointments</h3><span class="bdg bdg-blue" id="ovBadge">0</span></div>
+        <div class="tw"><table><thead><tr><th>Patient</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead><tbody id="ovTbl"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- APPOINTMENTS TAB -->
+    <div class="dtab" id="DT_appointments">
+      <div id="apptFBar" style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap"></div>
+      <div class="card">
+        <div class="card-h"><h3>All Appointments</h3><span class="bdg bdg-blue" id="allBadge">0</span></div>
+        <div class="tw"><table><thead><tr><th>Patient</th><th>Date</th><th>Time</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead><tbody id="allTbl"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE TAB -->
+    <div class="dtab" id="DT_schedule">
+      <div class="card">
+        <div class="card-h">
+          <h3>📅 Today's Schedule</h3>
+          <div style="display:flex;align-items:center;gap:10px">
+            <span class="bdg bdg-green" id="schedBadge">0 patients</span>
+            <input type="date" class="fc" id="schedDate" style="width:160px;padding:6px 10px;font-size:.82rem" onchange="renderSched()"/>
+          </div>
+        </div>
+        <div id="docTimeline"></div>
+      </div>
+    </div>
+
+    <!-- PATIENTS TAB -->
+    <div class="dtab" id="DT_patients">
+      <div class="card">
+        <div class="card-h"><h3>Patient List</h3><span class="bdg bdg-blue" id="patBadge">0</span></div>
+        <div class="tw"><table><thead><tr><th>Patient</th><th>Phone</th><th>Email</th><th>Total Visits</th><th>Last Visit</th><th>Action</th></tr></thead><tbody id="patTbl"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- PROFILE TAB -->
+    <div class="dtab" id="DT_profile">
+      <div style="max-width:580px">
+        <div class="card fu1">
+          <div class="card-h"><h3>👤 My Profile</h3></div>
+          <div class="card-b">
+            <div style="display:flex;align-items:center;gap:20px;background:var(--blue-l);padding:20px;border-radius:10px;margin-bottom:22px">
+              <div class="av av-lg" id="dProfAv" style="background:var(--blue)">RJ</div>
+              <div>
+                <div style="font-weight:800;font-size:1.05rem" id="dProfName"></div>
+                <div style="color:var(--muted);font-size:.85rem;margin-top:2px" id="dProfSpec"></div>
+                <div style="font-size:.78rem;color:var(--muted);margin-top:2px" id="dProfEmail"></div>
+              </div>
+            </div>
+            <div class="frow">
+              <div class="fg"><label>Speciality</label><input class="fc" id="dpSpec" disabled/></div>
+              <div class="fg"><label>Experience</label><input class="fc" id="dpExp" placeholder="e.g. 5 years"/></div>
+            </div>
+            <div class="frow">
+              <div class="fg"><label>Consultation Fee</label><input class="fc" id="dpFee" placeholder="e.g. $50"/></div>
+              <div class="fg"><label>Phone</label><input class="fc" id="dpPhone" placeholder="+1 000 000 0000"/></div>
+            </div>
+            <div class="fg"><label>About / Bio</label><textarea class="fc" id="dpAbout" placeholder="Brief bio..."></textarea></div>
+            <div class="fg"><label>Clinic / Address</label><input class="fc" id="dpAddr" placeholder="Clinic address"/></div>
+            <button class="btn btn-p btn-full" onclick="saveDocProfile()">Save Profile</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /dash-main -->
+</div><!-- /docDash -->
+
+<!-- ===================== FOOTER ===================== -->
+<footer id="mainFooter">
+  <div class="foot-g">
+    <div class="foot-brand">
+      <div class="logo" onclick="SP('home')">
+        <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-7 14H8v-2h4v2zm4-4H8v-2h8v2zm0-4H8V7h8v2z"/></svg></div>
+        <span class="logo-text" style="color:#fff">Prescripto</span>
+      </div>
+      <p>Simply browse through our extensive list of trusted doctors and schedule your appointment hassle-free.</p>
+    </div>
+    <div class="foot-col">
+      <h4>Company</h4>
+      <ul>
+        <li><a onclick="SP('home')">Home</a></li>
+        <li><a onclick="SP('about')">About us</a></li>
+        <li><a onclick="SP('contact')">Contact us</a></li>
+        <li><a>Privacy policy</a></li>
+      </ul>
+    </div>
+    <div class="foot-col">
+      <h4>Get In Touch</h4>
+      <ul>
+        <li><a>+1-000-000-0000</a></li>
+        <li><a><span class="__cf_email__" data-cfemail="92e2e0f7e1f1e0fbe2e6fdd2f5fff3fbfebcf1fdff">[email&#160;protected]</span></a></li>
+        <li><a onclick="OM('M_auth')">Patient Login</a></li>
+        <li><a onclick="OM('M_docAuth')">Doctor Login</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot-bottom"><p>Copyright © 2024 Prescripto — All Rights Reserved.</p></div>
+</footer>
+
+<!-- ===================== JAVASCRIPT ===================== -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+/* ============================================================
+   DATA
+============================================================ */
+const DOCTORS=[
+  {id:0,name:"Dr. Richard James",  spec:"General physician", initials:"RJ",color:"#4361ee",email:"rjames@prescripto.com",  fee:"$40",exp:"5 years",  about:"Experienced in comprehensive primary care and preventive medicine."},
+  {id:1,name:"Dr. Emily Larson",   spec:"Gynecologist",      initials:"EL",color:"#22c55e",email:"elarson@prescripto.com", fee:"$60",exp:"8 years",  about:"Specializes in women's health and reproductive medicine."},
+  {id:2,name:"Dr. Sarah Patel",    spec:"Dermatologist",     initials:"SP",color:"#f97316",email:"spatel@prescripto.com",  fee:"$55",exp:"6 years",  about:"Expert in skin conditions, cosmetic dermatology and treatments."},
+  {id:3,name:"Dr. Christopher Lee",spec:"Pediatrician",      initials:"CL",color:"#8b5cf6",email:"clee@prescripto.com",   fee:"$45",exp:"10 years", about:"Caring for children from birth through adolescence."},
+  {id:4,name:"Dr. Jennifer Garcia",spec:"Neurologist",       initials:"JG",color:"#ef4444",email:"jgarcia@prescripto.com",fee:"$70",exp:"12 years", about:"Specialist in headaches, epilepsy, stroke and neurological disorders."},
+  {id:5,name:"Dr. Andrew Williams",spec:"Gastroenterologist",initials:"AW",color:"#0e7490",email:"awilliams@prescripto.com",fee:"$65",exp:"9 years", about:"Expert in digestive system and gastrointestinal diseases."},
+  {id:6,name:"Dr. Lisa Wong",      spec:"General physician", initials:"LW",color:"#d97706",email:"lwong@prescripto.com",   fee:"$40",exp:"4 years",  about:"Focused on preventive care and managing chronic conditions."},
+  {id:7,name:"Dr. Ryan Martinez",  spec:"Gynecologist",      initials:"RM",color:"#db2777",email:"rmartinez@prescripto.com",fee:"$60",exp:"7 years", about:"Dedicated to prenatal care and women's reproductive health."},
+  {id:8,name:"Dr. Angela Brown",   spec:"Dermatologist",     initials:"AB",color:"#7c3aed",email:"abrown@prescripto.com", fee:"$55",exp:"5 years",  about:"Specializes in acne, eczema and advanced skin treatments."},
+  {id:9,name:"Dr. Kevin Nguyen",   spec:"Pediatrician",      initials:"KN",color:"#059669",email:"knguyen@prescripto.com",fee:"$45",exp:"6 years",  about:"Caring pediatrician focused on child development and wellness."},
+  {id:10,name:"Dr. Priya Singh",   spec:"Neurologist",       initials:"PS",color:"#b45309",email:"psingh@prescripto.com", fee:"$70",exp:"11 years", about:"Expert in migraines, movement disorders and neurodegenerative diseases."},
+  {id:11,name:"Dr. Mark Davis",    spec:"Gastroenterologist",initials:"MD",color:"#0369a1",email:"mdavis@prescripto.com", fee:"$65",exp:"8 years",  about:"Specialized in colonoscopy, liver disease and IBS management."},
+];
+const SPECS=[
+  {name:"General physician", icon:"🩺",bg:"#fff0f0"},
+  {name:"Gynecologist",      icon:"👩‍⚕️",bg:"#fff8e1"},
+  {name:"Dermatologist",     icon:"🧴",bg:"#f0f8ff"},
+  {name:"Pediatrician",      icon:"👶",bg:"#f0fff4"},
+  {name:"Neurologist",       icon:"🧠",bg:"#f5f0ff"},
+  {name:"Gastroenterologist",icon:"🫀",bg:"#fff0f8"},
+];
+const SLOTS=["9:00 AM","9:30 AM","10:00 AM","10:30 AM","11:00 AM","11:30 AM","2:00 PM","2:30 PM","3:00 PM","3:30 PM","4:00 PM","4:30 PM"];
+const SLIDES=[
+  {title:"Book Appointment<br>With Trusted Doctors",desc:"Simply browse through our extensive list of trusted doctors, schedule your appointment hassle-free.",bg:"#4361ee"},
+  {title:"Expert Specialists<br>At Your Fingertips",desc:"Choose from 30+ specialities and 500+ verified doctors. Quality healthcare is just a click away.",bg:"#7c3aed"},
+  {title:"Your Health,<br>Our Priority",desc:"Fast confirmations, easy reschedules and reminders — we take care of everything for you.",bg:"#0e7490"},
+];
+const CBGS=["#e8f4fd","#fef3e8","#e8fdf0","#f3e8fd","#fde8e8","#e8f0fd","#fdfde8","#e8fdfd","#fde8f3","#f0fde8","#fdf0e8","#e8e8fd"];
+const AVCOLS=["#4361ee","#22c55e","#f97316","#8b5cf6","#ef4444","#0e7490","#d97706","#db2777"];
+
+/* ============================================================
+   API CONFIG – connected to backend
+============================================================ */
+const API = 'https://prescripto-backend-ho09.onrender.com/api';
+const getSess  = () => { try { return JSON.parse(localStorage.getItem('sess')) || null; } catch { return null; } };
+const setSess  = d  => localStorage.setItem('sess', JSON.stringify(d));
+const clrSess  = () => { localStorage.removeItem('sess'); localStorage.removeItem('token'); };
+const getToken = () => localStorage.getItem('token') || null;
+const setToken = t  => localStorage.setItem('token', t);
+
+async function api(path, method='GET', body=null, auth=false){
+  const headers = { 'Content-Type': 'application/json' };
+  if(auth){ const t=getToken(); if(t) headers['Authorization']='Bearer '+t; }
+  const opts = { method, headers };
+  if(body) opts.body = JSON.stringify(body);
+  try {
+    const res = await fetch(API+path, opts);
+    return res.json();
+  } catch(e) {
+    return { success:false, message:'Cannot connect to server. Is the backend running?' };
+  }
+}
+
+let DOCTORS_DB = [];
+async function loadDoctorsFromDB(){
+  const data = await api('/doctors');
+  if(data.success){ DOCTORS_DB = data.doctors; }
+  return DOCTORS_DB;
+}
+function getDocById(id){ return DOCTORS_DB.find(d=>d._id===id)||{}; }
+
+/* ============================================================
+   UTILS
+============================================================ */
+const fmtDate=d=>d?new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+const avCol=i=>AVCOLS[Math.abs(i)%AVCOLS.length];
+const inits=n=>n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);
+
+function toast(msg,type='s'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`show ${type}`;
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className='',3500);
+}
+
+/* ============================================================
+   MODAL
+============================================================ */
+const OM=id=>document.getElementById(id).classList.add('on');
+const CM=id=>document.getElementById(id).classList.remove('on');
+document.querySelectorAll('.ov').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('on')}));
+
+/* ============================================================
+   PAGE NAVIGATION
+============================================================ */
+function SP(page){
+  document.querySelectorAll('.page,.dash-page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('navMain').style.display='';
+  document.getElementById('navPat').style.display='none';
+  document.getElementById('mainFooter').style.display='';
+  document.getElementById('P_'+page).classList.add('active');
+  const map={home:0,allDocs:1,about:2,contact:3};
+  document.querySelectorAll('#mainNav li').forEach(li=>li.classList.remove('act'));
+  if(map[page]!==undefined) document.querySelectorAll('#mainNav li')[map[page]].classList.add('act');
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(page==='allDocs') renderAllDocs();
+}
+
+function showPatDash(){
+  document.querySelectorAll('.page,.dash-page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('navMain').style.display='none';
+  document.getElementById('navPat').style.display='';
+  document.getElementById('mainFooter').style.display='';
+  document.getElementById('P_patDash').classList.add('active');
+  const s=getSess();
+  if(s){
+    document.getElementById('patNavName').textContent=s.name;
+    document.getElementById('patWelcome').textContent=`Welcome, ${s.name.split(' ')[0]}!`;
+  }
+  showPatPage('appts');
+}
+
+function showPatPage(pg){
+  document.querySelectorAll('[id^="PP_"]').forEach(p=>p.style.display='none');
+  document.getElementById('PP_'+pg).style.display='';
+  document.querySelectorAll('#patNavLinks li').forEach(li=>li.classList.remove('act'));
+  ({appts:0,profile:1})[pg]!==undefined&&document.querySelectorAll('#patNavLinks li')[({appts:0,profile:1})[pg]].classList.add('act');
+  if(pg==='appts'){renderPatStats();renderPatAppts();}
+  if(pg==='profile'){loadPatProfile();}
+}
+
+function showDocDash(){
+  document.querySelectorAll('.page,.dash-page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('navMain').style.display='none';
+  document.getElementById('navPat').style.display='none';
+  document.getElementById('mainFooter').style.display='none';
+  document.getElementById('P_docDash').classList.add('active');
+  renderDocAll();
+}
+
+/* ============================================================
+   NAVBAR AUTH BUTTON
+============================================================ */
+function refreshPatBtn(){
+  const s=getSess();
+  const btn=document.getElementById('patBtn');
+  if(s&&s.role==='patient'){
+    btn.textContent=`Hi, ${s.name.split(' ')[0]} ▾`;
+    btn.onclick=showPatDash;
+  } else {
+    btn.textContent='Create account';
+    btn.onclick=patBtnClick;
+  }
+}
+function patBtnClick(){const s=getSess();if(s&&s.role==='patient')showPatDash();else OM('M_auth');}
+
+/* ============================================================
+   HERO CAROUSEL
+============================================================ */
+let slideIdx=0;
+function buildDots(){
+  document.getElementById('cdots').innerHTML=SLIDES.map((_,i)=>`<div class="cdot ${i===0?'on':''}" onclick="goSlide(${i})"></div>`).join('');
+}
+function goSlide(i){
+  slideIdx=i;const s=SLIDES[i];
+  document.getElementById('heroEl').style.background=s.bg;
+  document.getElementById('heroTitle').innerHTML=s.title;
+  document.getElementById('heroDesc').textContent=s.desc;
+  document.querySelectorAll('.cdot').forEach((d,j)=>d.classList.toggle('on',j===i));
+}
+function slide(d){goSlide((slideIdx+d+SLIDES.length)%SLIDES.length);}
+setInterval(()=>slide(1),5000);
+
+/* ============================================================
+   SPECIALITY
+============================================================ */
+let activeSpec=null;
+function renderSpecs(){
+  document.getElementById('specGrid').innerHTML=SPECS.map(s=>`
+    <div class="spec-card ${activeSpec===s.name?'on':''}" onclick="pickSpec('${s.name}',this)">
+      <div class="spec-ico" style="background:${s.bg}">${s.icon}</div>
+      <span>${s.name}</span>
+    </div>`).join('');
+}
+function pickSpec(name){
+  activeSpec=activeSpec===name?null:name;
+  homeVisible=8; renderSpecs(); renderHomeDocs();
+  document.getElementById('homeDocs').closest('.sec').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ============================================================
+   DOCTOR CARD SVG
+============================================================ */
+function docSVG(){
+  return `<svg viewBox="0 0 180 160" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+    <circle cx="90" cy="55" r="30" fill="#FDBCB4"/>
+    <ellipse cx="90" cy="30" rx="30" ry="14" fill="#5d4037"/>
+    <rect x="62" y="82" width="56" height="80" rx="8" fill="white"/>
+    <rect x="80" y="82" width="20" height="45" fill="#e0e0e0"/>
+    <circle cx="90" cy="115" r="8" fill="#bbb" stroke="#999" stroke-width="1.5"/>
+    <circle cx="80" cy="52" r="3" fill="#333"/><circle cx="100" cy="52" r="3" fill="#333"/>
+    <path d="M82 63 Q90 70 98 63" stroke="#c57a60" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+function dCard(d){
+  return `<div class="dcard" onclick="openBook(${d.id})">
+    <div class="dcard-img" style="background:${CBGS[d.id%CBGS.length]}">${docSVG()}</div>
+    <div class="dcard-body">
+      <div class="avail"><div class="avail-dot"></div>Available</div>
+      <div class="dcard-name">${d.name}</div>
+      <div class="dcard-spec">${d.spec}</div>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   HOME DOCTORS
+============================================================ */
+let homeVisible=8;
+function renderHomeDocs(){
+  const all=DOCTORS_DB.map((d,i)=>({...d,spec:d.specialization,initials:d.initials||(d.name.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2)),color:d.color||AVCOLS[i%AVCOLS.length]}));
+  const list=activeSpec?all.filter(d=>d.spec===activeSpec):all;
+  const show=list.slice(0,homeVisible);
+  document.getElementById('homeDocs').innerHTML=show.length?show.map(dCardDB).join(''):`<p style="color:var(--muted);padding:20px">No doctors found.</p>`;
+  document.getElementById('moreBtn').style.display=list.length>homeVisible?'':'none';
+  document.getElementById('docSubTxt').textContent=activeSpec?`Showing ${list.length} ${activeSpec} doctors`:'Browse our trusted healthcare professionals.';
+}
+function showMore(){homeVisible+=4;renderHomeDocs();}
+
+/* ============================================================
+   ALL DOCTORS PAGE
+============================================================ */
+let allDocF='All';
+function renderAllDocs(){
+  const fs=['All',...SPECS.map(s=>s.name)];
+  document.getElementById('allDocFilters').innerHTML=fs.map(f=>`
+    <button class="ftab ${allDocF===f?'on':''}" onclick="setAllDocF('${f}',this)">${f}</button>`).join('');
+  const all=DOCTORS_DB.map((d,i)=>({...d,spec:d.specialization,initials:d.initials||(d.name.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2)),color:d.color||AVCOLS[i%AVCOLS.length]}));
+  const list=allDocF==='All'?all:all.filter(d=>d.spec===allDocF);
+  document.getElementById('allDocGrid').innerHTML=list.map(dCardDB).join('');
+}
+function setAllDocF(f){allDocF=f;renderAllDocs();}
+
+/* ============================================================
+   PATIENT AUTH
+============================================================ */
+function switchAuth(tab){
+  document.getElementById('authLogin').style.display=tab==='login'?'':'none';
+  document.getElementById('authSignup').style.display=tab==='signup'?'':'none';
+  document.getElementById('atLogin').classList.toggle('on',tab==='login');
+  document.getElementById('atSignup').classList.toggle('on',tab==='signup');
+}
+
+async function handleSignup(){
+  const first=document.getElementById('sFirst').value.trim();
+  const last=document.getElementById('sLast').value.trim();
+  const email=document.getElementById('sEmail').value.trim();
+  const phone=document.getElementById('sPhone').value.trim();
+  const pass=document.getElementById('sPass').value;
+  if(!first||!last){toast('Please enter your full name.','e');return;}
+  if(!email.includes('@')){toast('Enter a valid email.','e');return;}
+  if(!phone){toast('Enter your phone number.','e');return;}
+  if(pass.length<6){toast('Password must be at least 6 characters.','e');return;}
+  const data = await api('/patients/signup','POST',{name:`${first} ${last}`,email,phone,password:pass});
+  if(!data.success){toast(data.message,'e');return;}
+  setToken(data.token);
+  setSess({id:data.user.id,name:data.user.name,email:data.user.email,role:'patient'});
+  CM('M_auth');
+  toast(`Welcome, ${first}! Account created 🎉`);
+  refreshPatBtn();
+}
+
+async function handleLogin(){
+  const email=document.getElementById('lEmail').value.trim();
+  const pass=document.getElementById('lPass').value;
+  if(!email||!pass){toast('Please fill all fields.','e');return;}
+  const data = await api('/patients/login','POST',{email,password:pass});
+  if(!data.success){toast(data.message,'e');return;}
+  setToken(data.token);
+  setSess({id:data.user.id,name:data.user.name,email:data.user.email,role:'patient'});
+  CM('M_auth');
+  toast(`Welcome back, ${data.user.name.split(' ')[0]}! 👋`);
+  refreshPatBtn();
+}
+
+function logoutPat(){clrSess();refreshPatBtn();SP('home');toast('Logged out successfully.');}
+
+/* ============================================================
+   DOCTOR AUTH
+============================================================ */
+async function handleDocLogin(){
+  const email=document.getElementById('dEmail').value.trim();
+  const pass=document.getElementById('dPass').value;
+  if(!email.includes('@')){toast('Enter a valid email.','e');return;}
+  if(pass.length<3){toast('Enter your password.','e');return;}
+  const data = await api('/doctors/login','POST',{email,password:pass});
+  if(!data.success){toast(data.message,'e');return;}
+  setToken(data.token);
+  const doc=data.user;
+  setSess({id:doc.id,docId:doc.id,name:doc.name,spec:doc.specialization,role:'doctor',initials:doc.initials,color:doc.color});
+  document.getElementById('dSideAv').textContent=doc.initials;
+  document.getElementById('dSideAv').style.background=doc.color;
+  document.getElementById('dSideName').textContent=doc.name;
+  document.getElementById('dSideSpec').textContent=doc.specialization;
+  const hr=new Date().getHours();
+  document.getElementById('docGreet').textContent=`${hr<12?'Good morning':hr<17?'Good afternoon':'Good evening'}, Dr. ${doc.name.split(' ').pop()} 👋`;
+  document.getElementById('docDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('schedDate').value=new Date().toISOString().split('T')[0];
+  CM('M_docAuth');
+  showDocDash();
+  toast(`Welcome, ${doc.name}! 🩺`);
+}
+
+function logoutDoc(){clrSess();SP('home');toast('Logged out successfully.');}
+
+/* ============================================================
+   BOOKING MODAL
+============================================================ */
+let bookDocId=null, pickedSlot=null;
+
+function openBook(docId){
+  const s=getSess();
+  if(!s||s.role!=='patient'){toast('Please login or create account to book.','i');OM('M_auth');return;}
+  bookDocId=docId;
+  const doc=DOCTORS_DB.find(d=>d._id===docId)||{};
+  const initials=doc.initials||(doc.name?doc.name.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2):'?');
+  document.getElementById('bookBanner').innerHTML=`
+    <div class="av av-md" style="background:${doc.color||'#4361ee'}">${initials}</div>
+    <div><div style="font-weight:700">${doc.name||''}</div><div style="font-size:.8rem;color:var(--muted)">${doc.specialization||''} · Fee: ${doc.fee||''}</div></div>`;
+  pickedSlot=null;
+  document.getElementById('slotGrid').innerHTML='<p style="font-size:.8rem;color:var(--muted)">Select a date to see available slots.</p>';
+  document.getElementById('slotMsg').textContent='';
+  document.getElementById('bDate').value='';
+  document.getElementById('bDate').min=new Date().toISOString().split('T')[0];
+  document.getElementById('bName').value=s.name||'';
+  document.getElementById('bEmail').value=s.email||'';
+  document.getElementById('bPhone').value='';
+  document.getElementById('bReason').value='';
+  OM('M_book');
+}
+
+async function loadSlots(){
+  const date=document.getElementById('bDate').value;
+  if(!date)return;
+  document.getElementById('slotGrid').innerHTML='<p style="font-size:.8rem;color:var(--muted)">Loading slots...</p>';
+  const data = await api(`/appointments/slots?doctorId=${bookDocId}&date=${date}`);
+  const bkd = data.success ? data.bookedSlots : [];
+  pickedSlot=null;
+  document.getElementById('slotMsg').textContent=bkd.length?`⚠️ ${bkd.length} slot(s) already booked for this date.`:'✅ All slots available!';
+  document.getElementById('slotGrid').innerHTML=SLOTS.map(t=>{
+    const taken=bkd.includes(t);
+    return `<button class="slot-btn${taken?' taken':''}" ${taken?'disabled':''} onclick="pickSlot(this,'${t}')">${t}${taken?' ✗':''}</button>`;
+  }).join('');
+}
+
+function pickSlot(el,t){
+  document.querySelectorAll('.slot-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on'); pickedSlot=t;
+}
+
+async function confirmBooking(){
+  const name=document.getElementById('bName').value.trim();
+  const phone=document.getElementById('bPhone').value.trim();
+  const email=document.getElementById('bEmail').value.trim();
+  const reason=document.getElementById('bReason').value;
+  const date=document.getElementById('bDate').value;
+  if(!name){toast('Enter your name.','e');return;}
+  if(!phone){toast('Enter phone number.','e');return;}
+  if(!date){toast('Select a date.','e');return;}
+  if(!pickedSlot){toast('Select a time slot.','e');return;}
+  if(!reason){toast('Select a reason.','e');return;}
+  const data = await api('/appointments','POST',{
+    doctorId:bookDocId, date, time:pickedSlot, reason,
+    patName:name, patPhone:phone, patEmail:email
+  }, true);
+  if(!data.success){toast(data.message,'e');return;}
+  const doc=DOCTORS_DB.find(d=>d._id===bookDocId)||{name:'Doctor'};
+  CM('M_book');
+  toast(`✅ Appointment with ${doc.name} on ${fmtDate(date)} at ${pickedSlot}!`);
+}
+
+/* ============================================================
+   CONTACT
+============================================================ */
+async function sendContact(){
+  const n=document.getElementById('cName').value.trim();
+  const e=document.getElementById('cEmail').value.trim();
+  const m=document.getElementById('cMsg').value.trim();
+  const subj=document.getElementById('cSubj')?.value.trim()||'';
+  if(!n||!e||!m){toast('Please fill all required fields.','e');return;}
+  const data=await api('/contact','POST',{name:n,email:e,subject:subj,message:m});
+  if(data.success){
+    toast("Message sent! We'll get back to you soon 📬");
+    ['cName','cEmail','cSubj','cMsg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  } else { toast(data.message,'e'); }
+}
+
+/* ============================================================
+   PATIENT DASHBOARD – APPOINTMENTS
+============================================================ */
+let patFilt='all', cancelId=null;
+
+async function renderPatStats(){
+  const data = await api('/appointments/my','GET',null,true);
+  const mine = data.success ? data.appointments : [];
+  document.getElementById('pst1').textContent=mine.length;
+  document.getElementById('pst2').textContent=mine.filter(a=>a.status==='confirmed').length;
+  document.getElementById('pst3').textContent=mine.filter(a=>a.status==='pending').length;
+  document.getElementById('pst4').textContent=mine.filter(a=>a.status==='completed').length;
+}
+
+function patFilter(f,el){
+  patFilt=f;
+  document.querySelectorAll('#patFtabs .ftab').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on'); renderPatAppts();
+}
+
+async function renderPatAppts(){
+  const el=document.getElementById('patApptList');
+  el.innerHTML='<p style="color:var(--muted);padding:20px">Loading...</p>';
+  const data = await api('/appointments/my','GET',null,true);
+  let mine = data.success ? data.appointments : [];
+  if(patFilt!=='all') mine=mine.filter(a=>a.status===patFilt);
+  if(!mine.length){
+    el.innerHTML=`<div class="empty"><div class="empty-ico">📭</div><p>No ${patFilt==='all'?'':patFilt} appointments found.</p></div>`;
+    return;
+  }
+  const today=new Date().toISOString().split('T')[0];
+  el.innerHTML=mine.map(a=>{
+    const doc=a.doctor||{};
+    const canCancel=['pending','confirmed'].includes(a.status)&&a.date>=today;
+    return `<div class="appt-card">
+      <div class="av av-md" style="background:${doc.color||'#4361ee'}">${doc.initials||'?'}</div>
+      <div class="appt-info">
+        <div class="appt-dname">${doc.name||a.docName||'Unknown'}</div>
+        <div class="appt-dspec">${doc.specialization||a.docSpec||''}</div>
+        <div style="margin-top:8px"><span class="bdg bdg-${a.status}">${a.status}</span></div>
+      </div>
+      <div class="appt-meta">
+        <div class="ameta-row">📅 <strong>${fmtDate(a.date)}</strong></div>
+        <div class="ameta-row">🕐 <strong>${a.time}</strong></div>
+        <div class="ameta-row">📋 ${a.reason}</div>
+        ${a.prescription?`<div class="ameta-row">💊 Prescription available</div>`:''}
+      </div>
+      <div class="appt-actions">
+        <button class="btn btn-o btn-sm" onclick="viewDetailDB('${a._id}')">View Details</button>
+        ${canCancel?`<button class="btn btn-d btn-sm" onclick="askCancelDB('${a._id}',\`${doc.name||a.docName}\`,\`${a.date}\`,\`${a.time}\`,\`${a.reason}\`)">Cancel</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function viewDetail(id){
+  viewDetailDB(id); return;
+  const a=null;if(!a)return;
+  const doc=DOCTORS[a.docId]||{};
+  document.getElementById('detailContent').innerHTML=`
+    <div class="mtitle">Appointment Details</div>
+    <div style="display:flex;align-items:center;gap:14px;background:var(--blue-l);padding:16px;border-radius:10px;margin:14px 0">
+      <div class="av av-md" style="background:${doc.color||'#4361ee'}">${doc.initials||'?'}</div>
+      <div><div style="font-weight:700">${doc.name}</div><div style="font-size:.8rem;color:var(--muted)">${doc.spec}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+      <div><div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase">Date</div><div style="font-weight:600;margin-top:4px">${fmtDate(a.date)}</div></div>
+      <div><div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase">Time</div><div style="font-weight:600;margin-top:4px">${a.time}</div></div>
+      <div><div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase">Reason</div><div style="font-weight:600;margin-top:4px">${a.reason}</div></div>
+      <div><div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase">Status</div><div style="margin-top:4px"><span class="bdg bdg-${a.status}">${a.status}</span></div></div>
+    </div>
+    ${a.notes?`<div style="margin-bottom:14px"><div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:6px">Doctor's Notes</div><div style="background:#f8faff;padding:12px;border-radius:8px;font-size:.88rem;line-height:1.6">${a.notes}</div></div>`:''}
+    ${a.rx?`<div><div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:6px">Prescription</div><div style="background:#f0fff4;padding:12px;border-radius:8px;font-size:.88rem;line-height:1.6;border-left:3px solid var(--green)">${a.rx}</div></div>`:'<p style="color:var(--muted);font-size:.85rem">No prescription issued yet.</p>'}`;
+  OM('M_detail');
+}
+
+function askCancel(id){
+  askCancelDB(id,'Doctor','-','-','-');
+}
+async function doCancel(){
+  const data = await api('/appointments/my/'+cancelId+'/cancel','PATCH',{},true);
+  CM('M_cancel');
+  if(data.success){toast('Appointment cancelled.');} else {toast(data.message,'e');}
+  renderPatStats(); renderPatAppts();
+}
+
+function askCancelDB(id,docName,date,time,reason){
+  cancelId=id;
+  document.getElementById('cancelInfo').innerHTML=`<strong>${docName}</strong><br>${fmtDate(date)} at ${time}<br>Reason: ${reason}`;
+  OM('M_cancel');
+}
+
+async function viewDetailDB(id){
+  const data = await api('/appointments/my/'+id,'GET',null,true);
+  if(!data.success){toast('Could not load details.','e');return;}
+  const a=data.appointment;
+  const doc=a.doctor||{};
+  document.getElementById('detailContent').innerHTML=`
+    <div class="mtitle">Appointment Details</div>
+    <div style="display:flex;align-items:center;gap:14px;background:var(--blue-l);padding:16px;border-radius:10px;margin:14px 0">
+      <div class="av av-md" style="background:${doc.color||'#4361ee'}">${doc.initials||'?'}</div>
+      <div><div style="font-weight:700">${doc.name||a.docName}</div><div style="font-size:.8rem;color:var(--muted)">${doc.specialization||a.docSpec}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+      <div><div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase">Date</div><div style="font-weight:600;margin-top:4px">${fmtDate(a.date)}</div></div>
+      <div><div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase">Time</div><div style="font-weight:600;margin-top:4px">${a.time}</div></div>
+      <div><div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase">Reason</div><div style="font-weight:600;margin-top:4px">${a.reason}</div></div>
+      <div><div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase">Status</div><div style="margin-top:4px"><span class="bdg bdg-${a.status}">${a.status}</span></div></div>
+    </div>
+    ${a.notes?`<div style="margin-bottom:14px"><div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:6px">Doctor Notes</div><div style="background:#f8faff;padding:12px;border-radius:8px;font-size:.88rem">${a.notes}</div></div>`:''}
+    ${a.prescription?`<div><div style="font-size:.72rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:6px">Prescription</div><div style="background:#f0fff4;padding:12px;border-radius:8px;font-size:.88rem;border-left:3px solid var(--green)">${a.prescription}</div></div>`:'<p style="color:var(--muted);font-size:.85rem">No prescription issued yet.</p>'}`;
+  OM('M_detail');
+}
+
+/* ============================================================
+   PATIENT PROFILE
+============================================================ */
+async function loadPatProfile(){
+  const s=getSess();if(!s)return;
+  const data=await api('/patients/me','GET',null,true);
+  if(!data.success)return;
+  const p=data.patient;
+  document.getElementById('profAv').textContent=inits(p.name);
+  document.getElementById('profHeroName').textContent=p.name;
+  document.getElementById('profHeroEmail').textContent=p.email;
+  const [fn,...rest]=p.name.split(' ');
+  document.getElementById('pFirst').value=fn;
+  document.getElementById('pLast').value=rest.join(' ');
+  document.getElementById('pEmail').value=p.email;
+  document.getElementById('pPhone').value=p.phone||'';
+  document.getElementById('pGender').value=p.gender||'';
+  document.getElementById('pDob').value=p.dob||'';
+  document.getElementById('pAddr').value=p.address||'';
+  const apptData=await api('/appointments/my','GET',null,true);
+  const appts=apptData.success?apptData.appointments:[];
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('patSummary').innerHTML=`
+    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;font-size:.875rem"><span style="color:var(--muted)">Total Appointments</span><strong>${appts.length}</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;font-size:.875rem"><span style="color:var(--muted)">Completed</span><strong>${appts.filter(a=>a.status==='completed').length}</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;font-size:.875rem"><span style="color:var(--muted)">Upcoming</span><strong>${appts.filter(a=>a.date>=today&&a.status!=='cancelled').length}</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:10px 0;font-size:.875rem"><span style="color:var(--muted)">Cancelled</span><strong>${appts.filter(a=>a.status==='cancelled').length}</strong></div>
+    <div style="margin-top:16px"><button class="btn btn-o" style="width:100%;justify-content:center" onclick="showPatPage('appts')">View All Appointments</button></div>`;
+}
+
+async function savePatProfile(){
+  const s=getSess();if(!s)return;
+  const first=document.getElementById('pFirst').value.trim();
+  const last=document.getElementById('pLast').value.trim();
+  const phone=document.getElementById('pPhone').value.trim();
+  if(!first||!last){toast('Enter your name.','e');return;}
+  const body={name:`${first} ${last}`,phone,
+    gender:document.getElementById('pGender').value,
+    dob:document.getElementById('pDob').value,
+    address:document.getElementById('pAddr').value.trim()};
+  const data=await api('/patients/me','PUT',body,true);
+  if(!data.success){toast(data.message,'e');return;}
+  s.name=body.name;setSess(s);
+  toast('Profile updated! ✅');
+  document.getElementById('patNavName').textContent=s.name;
+  loadPatProfile();
+}
+
+async function changePwd(){
+  const old=document.getElementById('pwOld').value;
+  const nw=document.getElementById('pwNew').value;
+  const cn=document.getElementById('pwCnf').value;
+  if(!old||!nw||!cn){toast('Fill all fields.','e');return;}
+  if(nw.length<6){toast('New password must be at least 6 characters.','e');return;}
+  if(nw!==cn){toast('Passwords do not match.','e');return;}
+  const data=await api('/patients/me/password','PUT',{currentPassword:old,newPassword:nw},true);
+  if(data.success){
+    toast('Password changed! 🔒');
+    ['pwOld','pwNew','pwCnf'].forEach(id=>document.getElementById(id).value='');
+  } else toast(data.message,'e');
+}
+
+/* ============================================================
+   DOCTOR DASHBOARD
+============================================================ */
+let docFilt='all', editId=null;
+// myAppts removed - now using API
+
+function renderDocAll(){
+  renderOv(); renderApptFBar(); renderAllAppts(); renderSched(); renderDocPats(); loadDocProfile();
+}
+
+/* OVERVIEW */
+async function renderOv(){
+  const data=await api('/appointments/doctor/stats','GET',null,true);
+  const apptData=await api('/appointments/doctor','GET',null,true);
+  if(!data.success)return;
+  const s=data.stats;
+  const mine=apptData.success?apptData.appointments:[];
+  document.getElementById('ov1').textContent=s.total||0;
+  document.getElementById('ov2').textContent=s.today||0;
+  document.getElementById('ov3').textContent=s.pending||0;
+  document.getElementById('ov4').textContent=s.completed||0;
+  document.getElementById('ovBadge').textContent=(s.total||0)+' total';
+  renderTbl('ovTbl',mine.slice(0,6),true);
+}
+
+/* APPOINTMENTS TABLE */
+function renderTbl(id,list,compact){
+  const tb=document.getElementById(id);
+  if(!list.length){
+    tb.innerHTML=`<tr><td colspan="6"><div class="empty"><div class="empty-ico">📭</div><p>No appointments found.</p></div></td></tr>`;return;
+  }
+  tb.innerHTML=list.map(a=>{
+    const c=avCol(a._id);
+    const aid=a._id;
+    const btns=compact
+      ?`${a.status==='pending'?`<button class="btn btn-s btn-sm" onclick="updStatusDB('${aid}','confirmed')">Confirm</button>`:''}`
+      :`<div style="display:flex;gap:5px;flex-wrap:wrap">
+          ${a.status==='pending'?`<button class="btn btn-s btn-sm" onclick="updStatusDB('${aid}','confirmed')">✓ Confirm</button>`:''}
+          ${a.status==='confirmed'?`<button class="btn btn-sm" style="background:var(--blue-l);color:var(--blue)" onclick="updStatusDB('${aid}','completed')">Done</button>`:''}
+          ${['pending','confirmed'].includes(a.status)?`<button class="btn btn-d btn-sm" onclick="updStatusDB('${aid}','cancelled')">✗ Cancel</button>`:''}
+          <button class="btn btn-o btn-sm" onclick="openNotesDB('${aid}')">Notes/Rx</button>
+        </div>`;
+    return `<tr>
+      <td><div class="pt-cell"><div class="av av-sm" style="background:${c}">${inits(a.patName)}</div><div><div class="pt-name">${a.patName}</div><div class="pt-sub">${a.patPhone}</div></div></div></td>
+      <td>${fmtDate(a.date)}</td><td><strong>${a.time}</strong></td><td>${a.reason}</td>
+      <td><span class="bdg bdg-${a.status}">${a.status}</span></td>
+      <td>${btns}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function updStatusDB(id,status){
+  const data=await api('/appointments/doctor/'+id+'/status','PATCH',{status},true);
+  if(data.success){toast('Appointment '+status+' ✅');renderDocAll();}
+  else toast(data.message,'e');
+}
+
+/* FILTER BAR */
+function renderApptFBar(){
+  const fs=['all','pending','confirmed','completed','cancelled'];
+  document.getElementById('apptFBar').innerHTML=fs.map(f=>
+    `<button class="ftab ${docFilt===f?'on':''}" onclick="setDocFilt('${f}')">${f.charAt(0).toUpperCase()+f.slice(1)}</button>`).join('');
+}
+function setDocFilt(f){docFilt=f;renderApptFBar();renderAllAppts();}
+
+async function renderAllAppts(){
+  const data=await api('/appointments/doctor','GET',null,true);
+  let list=data.success?data.appointments:[];
+  if(docFilt!=='all') list=list.filter(a=>a.status===docFilt);
+  document.getElementById('allBadge').textContent=list.length;
+  renderTbl('allTbl',list,false);
+}
+
+/* SCHEDULE / TIMELINE */
+async function renderSched(){
+  const date=document.getElementById('schedDate')?.value||new Date().toISOString().split('T')[0];
+  const data=await api('/appointments/doctor?date='+date,'GET',null,true);
+  let mine=data.success?data.appointments.filter(a=>a.status!=='cancelled'):[];
+  mine.sort((a,b)=>{
+    const toMin=t=>{const[h,m]=t.replace(' AM','').replace(' PM','').split(':');
+      return parseInt(h)%12*60+parseInt(m)+(t.includes('PM')?720:0);};
+    return toMin(a.time)-toMin(b.time);
+  });
+  document.getElementById('schedBadge').textContent=mine.length+' patients';
+  const cols={confirmed:'#22c55e',pending:'#f97316',completed:'#4361ee',cancelled:'#ef4444'};
+  document.getElementById('docTimeline').innerHTML=mine.length
+    ?mine.map(a=>`
+      <div class="tl-item">
+        <div class="tl-time">${a.time}</div>
+        <div class="tl-bar" style="background:${cols[a.status]||'#ccc'}"></div>
+        <div class="av av-sm" style="background:${avCol(a._id)}">${inits(a.patName)}</div>
+        <div style="flex:1">
+          <div class="tl-name">${a.patName}</div>
+          <div class="tl-detail">${a.reason} · <span class="bdg bdg-${a.status}">${a.status}</span></div>
+        </div>
+        <div style="display:flex;gap:6px">
+          ${a.status==='pending'?`<button class="btn btn-s btn-sm" onclick="updStatusDB('${a._id}','confirmed')">Confirm</button>`:''}
+          <button class="btn btn-o btn-sm" onclick="openNotesDB('${a._id}')">Notes</button>
+        </div>
+      </div>`).join('')
+    :`<div class="empty"><div class="empty-ico">🗓️</div><p>No appointments for this date.</p></div>`;
+}
+
+/* PATIENTS LIST */
+async function renderDocPats(){
+  const data=await api('/appointments/doctor/patients','GET',null,true);
+  const pats=data.success?data.patients:[];
+  document.getElementById('patBadge').textContent=pats.length+' patients';
+  document.getElementById('patTbl').innerHTML=pats.length
+    ?pats.map((p,i)=>`
+      <tr>
+        <td><div class="pt-cell"><div class="av av-sm" style="background:${avCol(i)}">${inits(p.patient.name)}</div><div class="pt-name">${p.patient.name}</div></div></td>
+        <td>${p.patient.phone||'—'}</td><td>${p.patient.email||'—'}</td>
+        <td><strong>${p.totalVisits}</strong></td>
+        <td>${fmtDate(p.lastVisit)}</td>
+        <td><button class="btn btn-o btn-sm" onclick="viewPatHistDB('${p.patient._id}','${p.patient.name}')">History</button></td>
+      </tr>`).join('')
+    :`<tr><td colspan="6"><div class="empty"><div class="empty-ico">👥</div><p>No patients yet.</p></div></td></tr>`;
+}
+
+/* PATIENT HISTORY MODAL */
+async function viewPatHistDB(patId, name){
+  const data=await api('/appointments/doctor/patients/'+patId+'/history','GET',null,true);
+  const visits=data.success?data.history:[];
+  document.getElementById('histTitle').textContent='Patient History — '+name;
+  document.getElementById('histSub').textContent=visits.length+' visit(s) recorded';
+  document.getElementById('histBody').innerHTML=visits.map(a=>`
+    <div style="border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+        <div><strong>${fmtDate(a.date)}</strong> at <strong>${a.time}</strong></div>
+        <span class="bdg bdg-${a.status}">${a.status}</span>
+      </div>
+      <div style="font-size:.85rem;color:var(--muted);margin-bottom:8px">Reason: ${a.reason}</div>
+      ${a.notes?`<div style="background:#f8faff;padding:10px;border-radius:6px;font-size:.82rem;margin-bottom:8px"><strong>Notes:</strong> ${a.notes}</div>`:''}
+      ${a.prescription?`<div style="background:#f0fff4;padding:10px;border-radius:6px;font-size:.82rem;border-left:3px solid var(--green)"><strong>Prescription:</strong> ${a.prescription}</div>`:'<p style="font-size:.78rem;color:var(--muted)">No prescription yet.</p>'}
+    </div>`).join('');
+  OM('M_hist');
+}
+
+/* NOTES / PRESCRIPTION MODAL */
+async function openNotesDB(id){
+  editId=id;
+  const data=await api('/appointments/doctor','GET',null,true);
+  const a=data.success?data.appointments.find(x=>x._id===id):null;
+  if(!a)return;
+  document.getElementById('notesTitle').textContent='Notes & Prescription';
+  document.getElementById('notesSub').textContent=a.patName+' · '+fmtDate(a.date)+' at '+a.time+' · '+a.reason;
+  document.getElementById('notesBody').innerHTML=`
+    <div class="fg"><label>Doctor's Notes</label><textarea class="fc" id="nTxt" style="height:100px">${a.notes||''}</textarea></div>
+    <div class="fg"><label>Prescription</label><textarea class="fc" id="rxTxt" style="height:100px" placeholder="e.g. Paracetamol 500mg - 1 tab 3x daily for 5 days...">${a.prescription||''}</textarea></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-p" style="flex:1;justify-content:center;border-radius:8px" onclick="saveNotesDB()">Save Notes & Prescription</button>
+      <button class="btn btn-o" style="border-radius:8px" onclick="CM('M_notes')">Cancel</button>
+    </div>`;
+  OM('M_notes');
+}
+async function saveNotesDB(){
+  const notes=document.getElementById('nTxt').value.trim();
+  const prescription=document.getElementById('rxTxt').value.trim();
+  const data=await api('/appointments/doctor/'+editId+'/notes','PUT',{notes,prescription},true);
+  CM('M_notes');
+  if(data.success){toast('Notes & prescription saved! 💊');renderDocAll();}
+  else toast(data.message,'e');
+}
+
+/* DOCTOR PROFILE */
+async function loadDocProfile(){
+  const s=getSess();if(!s||s.role!=='doctor')return;
+  const data=await api('/doctors/'+s.docId,'GET',null,false);
+  if(!data.success)return;
+  const doc=data.doctor;
+  const initials=doc.initials||(doc.name.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2));
+  document.getElementById('dProfAv').textContent=initials;
+  document.getElementById('dProfAv').style.background=doc.color||'#4361ee';
+  document.getElementById('dProfName').textContent=doc.name;
+  document.getElementById('dProfSpec').textContent=doc.specialization;
+  document.getElementById('dProfEmail').textContent=doc.email;
+  document.getElementById('dpSpec').value=doc.specialization||'';
+  document.getElementById('dpExp').value=doc.experience||'';
+  document.getElementById('dpFee').value=doc.fee||'';
+  document.getElementById('dpPhone').value=doc.phone||'';
+  document.getElementById('dpAbout').value=doc.about||'';
+  document.getElementById('dpAddr').value=doc.address||'';
+}
+async function saveDocProfile(){
+  const body={
+    specialization:document.getElementById('dpSpec').value.trim(),
+    experience:document.getElementById('dpExp').value.trim(),
+    fee:document.getElementById('dpFee').value.trim(),
+    phone:document.getElementById('dpPhone').value.trim(),
+    about:document.getElementById('dpAbout').value.trim(),
+    address:document.getElementById('dpAddr').value.trim()
+  };
+  const data=await api('/doctors/me/profile','PUT',body,true);
+  if(data.success) toast('Profile saved! ✅');
+  else toast(data.message,'e');
+}
+
+/* DOCTOR TAB SWITCH */
+function docTab(tab){
+  document.querySelectorAll('.dtab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('DT_'+tab).classList.add('on');
+  document.querySelectorAll('#docNav li').forEach(li=>li.classList.remove('on'));
+  const tabs=['overview','appointments','schedule','patients','profile'];
+  document.querySelectorAll('#docNav li')[tabs.indexOf(tab)]?.classList.add('on');
+  renderDocAll();
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+// DB doctor card
+function dCardDB(d){
+  const initials=d.initials||(d.name.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2));
+  const color=d.color||'#4361ee';
+  return `<div class="dcard" onclick="openBook('${d._id}')">
+    <div class="dcard-img" style="background:${CBGS[DOCTORS_DB.indexOf(d)%CBGS.length]||'#eef1ff'}">${docSVG()}</div>
+    <div class="dcard-body">
+      <div class="avail"><div class="avail-dot"></div>Available</div>
+      <div class="dcard-name">${d.name}</div>
+      <div class="dcard-spec">${d.specialization}</div>
+    </div>
+  </div>`;
+}
+
+async function init(){
+  buildDots(); renderSpecs();
+  await loadDoctorsFromDB();
+  renderHomeDocs();
+  // Populate doctor select in modal from DB
+  const sel=document.getElementById('docSel');
+  DOCTORS_DB.forEach(d=>{
+    const o=document.createElement('option');
+    o.value=d._id; o.textContent=`${d.name} — ${d.specialization}`; sel.appendChild(o);
+  });
+  refreshPatBtn();
+  // Restore doctor session if exists
+  const s=getSess();
+  if(s&&s.role==='doctor'){
+    document.getElementById('dSideAv').textContent=s.initials||'DR';
+    document.getElementById('dSideAv').style.background=s.color||'#4361ee';
+    document.getElementById('dSideName').textContent=s.name;
+    document.getElementById('dSideSpec').textContent=s.spec;
+    const hr=new Date().getHours();
+    document.getElementById('docGreet').textContent=`${hr<12?'Good morning':hr<17?'Good afternoon':'Good evening'}, Dr. ${s.name.split(' ').pop()} 👋`;
+    document.getElementById('docDate').textContent=new Date().toLocaleDateS
+    document.getElementById('docDate').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    showDocDash();
+  }
+}
+
+window.onload=init;
+</script>
+</body>
+</html>
